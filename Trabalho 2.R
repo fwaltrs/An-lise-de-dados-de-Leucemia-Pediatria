@@ -1,10 +1,9 @@
 
-#importando a base de dados
+#importando a base de dados categorizadas. 
 library(readxl)
 leucc <- read.table("H:/Meu Drive/6º semestre/sobrevivência-listas em grupo/leucc.txt",header=T)
 
-
-
+#renomeando as covariáveis
 temp <- leucc$tempos
 cens <- leucc$cens
 idade <- leucc$idadec
@@ -36,8 +35,9 @@ summary(fit4)
 -2*fit4$loglik[2] #estat teste do TRV
 
 
+#vemos que o modelo 4 apresenta covariáveis significativas, logo vou escolher ele. 
 
-# ajustando o modelo 4 ----------------------------------------------------
+# ajustando o modelo 4 e vendo se ele é adequado ----------------------------------------------------
 
 resm<-resid(fit4,type="martingale")
 res<-cens - resm
@@ -58,6 +58,9 @@ abline(0,1,col="red")
 
 
 par(mfrow=c(2,3))
+
+#Analisando a principal suposição do modelo de Cox. 
+
 ## Avaliação de proporcionalidade
 attach(leucc)
 require(survival)
@@ -149,7 +152,7 @@ plot(cox.zph(fit4))
 
 
 
-###teste de proporcionalidade
+###teste de hipótese para testar a proporcionalidade dos riscos 
 prop_func <- function(fit, transform = "identity", new_cox.zph = NULL) {
   sresid <- resid(fit, "schoenfeld")
   varnames <- names(fit$coefficients)
@@ -202,48 +205,3 @@ abline(h=0, lty=2)
 
 
 
-
-
-
-
-
-
-
-Ht<-basehaz(fit4,centered=F)
-tempos=Ht$time
-H0<-Ht$hazard # Risco de base
-S0<-exp(-H0)
-tt = sort(tempos)
-aux1 = as.matrix(tt)
-n = nrow(aux1)
-aux2 = as.matrix(cbind(tempos,S0))
-S00 = rep(max(aux2[,2]),n)
-for(i in 1:n){
-  if (tt[i] > min(aux2[,1])) {
-    i1 = aux2[,1] <= tt[i]
-    S00[i] = min(aux2[i1,2])
-  }
-}
-ts0 = cbind(tt,S00)
-x1=1
-b = fit2$coefficients
-bb1 = b[1] # lwbc
-bb2 = b[2] 
-bb3 = b[3] 
-bb4 = b[4] 
-bb5 = b[5] 
-
-st1<-S00^(exp(bb1*x1 +bb2*1+bb3*1+bb4*1+bb5*1)) #
-st2<-S00^(exp(bb1*x1 +bb2*1+bb3*1+bb4*1+bb5*1)) 
-x1=0
-st11<-S00^(exp(bb1*x1+bb2*1+bb3*1+bb4*1+bb5*1)) 
-st21<-S00^(exp(bb1*x1 )) # lwbc=4, Ag=1 (Ag-)
-par(mfrow=c(1,2))
-plot(tt,st1, type="s",ylim=c(0,1),xlab="Tempos",ylab="S(t|x)",lty=2,col=1)
-lines(tt,st2,type="s",lty=2,col=2)
-legend(0,0.2,lty=c(2,2),col=c(1,2),c("idade=1","idade=0"),cex=0.5,bty="n")
-title("lwbc=1")
-plot(tt,st11, type="s",ylim=c(0,1),xlab="Tempos",ylab="S(t|x)",lty=2,col=1)
-lines(tt,st21,type="s",lty=2,col=2)
-legend(0,0.2,lty=c(2,2),col=c(1,2),c("idade=1","idade=0"),cex=0.5,bty="n")
-title("lwbc=0")
