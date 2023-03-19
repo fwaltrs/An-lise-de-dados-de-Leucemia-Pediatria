@@ -203,5 +203,48 @@ plot(pl,rd,xlab='Preditor linear',ylab='Resíduo Deviance',pch=16,main="Residuo 
 abline(h=0, lty=2)
 
 
+# interpretação dos coeficientes
+
+Ht<-basehaz(fit4,centered=F)
+tempos=Ht$time
+H0<-Ht$hazard # Risco de base
+S0<-exp(-H0)
+tt = sort(tempos)
+aux1 = as.matrix(tt)
+n = nrow(aux1)
+aux2 = as.matrix(cbind(tempos,S0))
+S00 = rep(max(aux2[,2]),n)
+for(i in 1:n){
+  if (tt[i] > min(aux2[,1])) {
+    i1 = aux2[,1] <= tt[i]
+    S00[i] = min(aux2[i1,2])
+  }
+}
+ts0 = cbind(tt,S00)
+x1=1
+x2=1
+x3=1
+x4=1
+x5=1
+b = fit4$coefficients
+bb1 = b[1] #idade
+bb2 = b[2] #zpeso
+bb3 = b[3] #pas
+bb4 = b[4] #vac
+bb5 = b[5] #leuini
+
+
+## somente variando a Idade e fixando o valor 1 para as demais covariáveis
+st2<-S00^(exp(bb1*1 +bb2*x2+bb3*x3+bb4*x4+bb5*x5 )) # idade=1
+st1<-S00^(exp(bb1*0 +bb2*x2+bb3*x3+bb4*x4+bb5*x5 )) # idade=0, 
+
+
+
+plot(tt,st1, type="s",ylim=c(0,1),xlab="Tempos",ylab="S(t|x)",lty=2,col=1)
+lines(tt,st2,type="s",lty=2,col=2)
+legend(0,0.2,lty=c(2,2),col=c(1,2),c("<= 96 meses",">96 meses"),cex=0.5,bty="n")
+title("")
+
+
 
 
